@@ -61,18 +61,14 @@ public class ImageDisplay {
 		}
 	}
 
-	public void showIms(String[] args){
-
-		// Read in the specified image
-		imgOne = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-		readImageRGB(width, height, args[0], imgOne);
+	public void showIms(BufferedImage img){
 
 		// Use label to display the image
 		frame = new JFrame();
 		GridBagLayout gLayout = new GridBagLayout();
 		frame.getContentPane().setLayout(gLayout);
 
-		lbIm1 = new JLabel(new ImageIcon(imgOne));
+		lbIm1 = new JLabel(new ImageIcon(img));
 
 		GridBagConstraints c = new GridBagConstraints();
 		c.fill = GridBagConstraints.HORIZONTAL;
@@ -91,8 +87,32 @@ public class ImageDisplay {
 	}
 
 	public static void main(String[] args) {
+
+		if (args.length < 4) {
+			System.err.println("Usage: java ImageDisplay <image.rgb> <scale (0.0-1.0)> <Q> <M>");
+			System.err.println("Example: java ImageDisplay Lena_512_512.rgb 0.8 12 -1");
+			return;
+		}
+
+		String imgPath = args[0];
+		float scale = Float.parseFloat(args[1]);
+		int quantizationLevel = Integer.parseInt(args[2]);
+		int mode = Integer.parseInt(args[3]);
+
 		ImageDisplay ren = new ImageDisplay();
-		ren.showIms(args);
+
+		// Read image
+		ren.imgOne = new BufferedImage(ren.width, ren.height, BufferedImage.TYPE_INT_RGB);
+		ren.readImageRGB(ren.width, ren.height, imgPath, ren.imgOne);
+
+		// Scale
+		BufferedImage scaled = Scale.scaleImage(ren.imgOne, scale);
+
+		// Quantize
+		BufferedImage quantized = Quantization.quantizeImage(scaled, quantizationLevel, mode);
+
+		// Display
+		ren.showIms(quantized);
 	}
 
 }
